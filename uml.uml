@@ -1,0 +1,102 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Machine {
+  - cpu: CPU
+  - memory: Memory
+  - registerFile: RegisterFile
+  - screen: Screen
+  - programLoader: ProgramLoader
+  - menu: Menu
+  - isRunning: boolean
+  + start()
+  + loadProgram(filePath: String)
+  + runCycle()
+  + runAll()
+  + stepMode()
+  + displayState()
+  + editRegister(registerIndex: int, value: int)
+  + editMemory(address: int, value: int)
+  + promptForExitOrLoad()
+}
+
+class CPU {
+  - pc: int
+  - ir: Instruction
+  - alu: ALU
+  - memory: Memory
+  - registerFile: RegisterFile
+  + fetch(): Instruction
+  + validate(instruction: Instruction)
+  + decode(instruction: Instruction)
+  + execute(instruction: Instruction)
+  + updatePC()
+}
+
+class Memory {
+  - cells: int[256]
+  - screen: Screen
+  + read(address: int): int
+  + write(address: int, value: int)
+  + display(rows: int, cols: int): String
+}
+
+class RegisterFile {
+  - registers: int[16]
+  + read(index: int): int
+  + write(index: int, value: int)
+  + display(): String
+}
+
+class ALU {
+  + addTwosComplement(operand1: int, operand2: int): int
+  + addFloat(operand1: float, operand2: float): float
+  + or(operand1: int, operand2: int): int
+  + and(operand1: int, operand2: int): int
+  + xor(operand1: int, operand2: int): int
+  + rotate(value: int, shift: int, direction: String): int
+}
+
+class Screen {
+  + displayMemory(memory: Memory)
+  + displayRegisters(registerFile: RegisterFile)
+  + displayIR(ir: Instruction)
+  + displayMessage(message: String)
+  + displayState(pc: int, ir: Instruction, registers: RegisterFile, memory: Memory)
+}
+
+class Instruction {
+  - opcode: int
+  - r: int
+  - x: int
+  - y: int
+  + isValid(): boolean
+  + getOpcode(): int
+  + getR(): int
+  + getX(): int
+  + getY(): int
+}
+class ProgramLoader {
+  + load(filePath: String, memory: Memory): int
+}
+
+class Menu {
+  + displayOptions()
+  + getUserChoice(): int
+  + promptForValue(prompt: String): int
+}
+
+Machine "1" *-- "1" CPU : manages
+Machine "1" *-- "1" Memory : has
+Machine "1" *-- "1" RegisterFile : has
+Machine "1" -- "1" Screen : manages
+Machine "1" -- "1" ProgramLoader : manages
+Machine "1" -- "1" Menu : manages
+
+CPU "1" -- "1" ALU : uses
+CPU "1" -- "1" Memory : accesses
+CPU "1" -- "1" RegisterFile : accesses
+CPU "1" -- "1" Instruction : decodes/executes
+
+Memory "1" --> "1" Screen : outputs to
+@enduml
